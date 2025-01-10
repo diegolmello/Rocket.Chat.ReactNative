@@ -1,9 +1,9 @@
 name: Format Code with Prettier
 
 on:
-  pull_request:
+  push:
     branches:
-      - '**'
+      - '*'
       - '!develop'
       - '!master'
       - '!single-server'
@@ -16,15 +16,17 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Check out code
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 0
-
+          
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'yarn'
 
       - name: Cache node_modules
@@ -58,6 +60,5 @@ jobs:
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
           git add .
-          git commit -m "chore: format code with Prettier [skip ci]"
-          # push to the PR's branch
-          git push origin HEAD:${{ github.head_ref }}
+          git commit -m "chore: format code with Prettier"
+          git push origin HEAD:${{ github.head_ref || github.ref_name }}
